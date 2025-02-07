@@ -120,7 +120,7 @@ func generateSummary(text string) (*SummarizationResponse, error) {
 	defer client.Close()
 
 	// Select model
-	model := client.GenerativeModel("gemini-pro")
+	model := client.GenerativeModel("gemini-2.0-pro-exp-02-05")
 	model.SetTemperature(0.7)
 
 	// Compassionate summarization prompt
