@@ -58,7 +58,7 @@ This project follows conventional commit standards to maintain a clean and consi
    ```
 
 ### Commit Message Format
-- One word, lowercase, ≤30 characters
+- Exactly one word, lowercase, ≤30 characters
 - Example: `deepseek`
 
 ### History Cleanup

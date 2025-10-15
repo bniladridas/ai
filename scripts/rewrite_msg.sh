@@ -19,6 +19,8 @@ git filter-branch --env-filter '
     first_line=$(echo "$first_line" | cut -c1-30)
     # Remove conventional type if present
     first_line=$(echo "$first_line" | sed 's/^[a-z]*: //')
+    # Keep only first word
+    first_line=$(echo "$first_line" | awk '{print $1}')
     # Reconstruct message
     rest=$(echo "$msg" | tail -n +2)
     echo "$first_line"

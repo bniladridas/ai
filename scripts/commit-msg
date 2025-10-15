@@ -21,7 +21,11 @@ if [[ ${#FIRST_LINE} -gt 30 ]]; then
     exit 1
 fi
 
-# Allow one-word messages
+# Check exactly one word (no spaces)
+if [[ "$FIRST_LINE" =~ \  ]]; then
+    echo "Error: Commit message must be exactly one word."
+    exit 1
+fi
 
 echo "Commit message follows conventional standards."
 exit 0
