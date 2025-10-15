@@ -16,6 +16,9 @@ htmlcov/
 coverage.xml
 .pytest_cache/
 
+# Ruff cache
+.ruff_cache/
+
 # Virtual Environments
 venv/
 .venv/
