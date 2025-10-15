@@ -184,7 +184,7 @@ def main():
         {"description": "Simple text summarization", "complexity": "low"}
     ]
     
-    print("🤖 Adaptive Model Selector Demonstration 🤖")
+    print("Adaptive Model Selector")
     for task in tasks:
         recommended_model = selector.select_optimal_model(
             task['description'], 

@@ -20,7 +20,7 @@ class AIModelPerformanceDashboard:
     
     def render_overview_section(self):
         """Create overview section with key performance insights"""
-        st.title("🤖 AI Model Performance Dashboard")
+        st.title("AI Model Performance")
         
         col1, col2, col3 = st.columns(3)
         
@@ -44,7 +44,7 @@ class AIModelPerformanceDashboard:
     
     def render_model_comparison(self):
         """Create comparative visualizations across models"""
-        st.header("🔍 Model Performance Comparison")
+        st.header("Model Comparison")
         
         # Response Time Comparison
         fig_response_time = px.bar(
@@ -68,7 +68,7 @@ class AIModelPerformanceDashboard:
     
     def render_historical_trends(self):
         """Show performance trends over time"""
-        st.header("📈 Historical Performance Trends")
+        st.header("Historical Trends")
         
         # Time series for each model
         models = self.df['model_name'].unique()
@@ -93,7 +93,7 @@ class AIModelPerformanceDashboard:
     
     def render_error_analysis(self):
         """Detailed error rate and performance analysis"""
-        st.header("⚠️ Error Rate and Performance Insights")
+        st.header("Error Analysis")
         
         fig_error_rate = px.bar(
             self.df, 
