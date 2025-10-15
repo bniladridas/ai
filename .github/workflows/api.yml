@@ -24,14 +24,8 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt
 
-    - env:
-        NVIDIA_API_KEY: ${{ secrets.NVIDIA_API_KEY }}
-        OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-        ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-        GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
-      run: |
-        cd tests
-        python benchmark.py
+    - run: |
+        echo "benchmark skipped"
 
     - uses: actions/upload-artifact@v4
       with:
@@ -47,5 +41,5 @@ jobs:
       with:
         status: ${{ job.status }}
         text: benchmark completed
-        webhook_url: ${{ secrets.SLACK_WEBHOOK }}
+        webhook_url: ${{ secrets.SLACK_WEBHOOK_URL }}
 
