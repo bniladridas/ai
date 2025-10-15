@@ -1,0 +1,14 @@
+#!/bin/bash
+
+# Lint script for local development
+# Usage: ./scripts/lint
+
+set -e
+
+echo "🔍 Running Ruff linter..."
+ruff check .
+
+echo "📝 Checking code formatting..."
+ruff format --check .
+
+echo "✅ All checks passed!"

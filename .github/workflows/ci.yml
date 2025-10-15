@@ -9,7 +9,7 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
-    
+
     steps:
     - uses: actions/checkout@v4
 
@@ -22,6 +22,11 @@ jobs:
         pip install httpx --upgrade
         pip install -r requirements.txt
         pip install pytest
+
+    - name: Lint with Ruff
+      run: |
+        ruff check .
+        ruff format --check .
 
      - env:
          NVIDIA_API_KEY: ${{ secrets.NVIDIA_API_KEY }}
