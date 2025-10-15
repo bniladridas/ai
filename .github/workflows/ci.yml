@@ -20,7 +20,7 @@ jobs:
     - run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
-        pip install pytest
+        pip install pytest httpx --upgrade
 
     - env:
         NVIDIA_API_KEY: ${{ secrets.NVIDIA_API_KEY }}
