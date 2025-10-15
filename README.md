@@ -1,6 +1,6 @@
 # AI Benchmark
 
-Compare DeepSeek R1, GPT-4o, Claude-3.5, Gemini-1.5.
+Compare DeepSeek R1, GPT-4o, Claude-3.5-Sonnet, Gemini-2.0.
 
 ## Quick Start
 
