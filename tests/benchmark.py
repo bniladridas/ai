@@ -265,7 +265,7 @@ def main():
         {"name": "gpt-4o", "type": "openai"},
         {"name": "deepseek-r1", "type": "deepseek"},
         {"name": "claude-3-5-sonnet-20241022", "type": "anthropic"},
-        {"name": "gemini-1.5-flash", "type": "google"}
+        {"name": "gemini-2.0-flash-exp", "type": "google"}
     ]
     
     benchmark = AdvancedModelBenchmark(models)

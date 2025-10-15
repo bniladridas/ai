@@ -26,7 +26,7 @@ class AdaptiveModelSelector:
             'gpt-4o',
             'deepseek-r1',
             'claude-3-5-sonnet-20241022',
-            'gemini-1.5-flash'
+            'gemini-2.0-flash-exp'
         ]
         
         # Task complexity mapping
