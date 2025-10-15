@@ -1,34 +1,28 @@
-# Future Improvements Needed
-# Areas for improvement: additional validation checks, performance optimizations
-
-name: Advanced AI Model Performance Validation
+name: api
 
 on:
   schedule:
-    - cron: '0 6 * * 1'  # Run weekly on Monday at 6 AM
-  workflow_dispatch:  # Allow manual trigger
+    - cron: '0 6 * * 1'
+  workflow_dispatch:
   pull_request:
     branches: [ main ]
 
 jobs:
-  advanced-model-benchmarking:
+  test:
     runs-on: ubuntu-latest
-    
+
     steps:
     - uses: actions/checkout@v3
-    
-    - name: Set up Python
-      uses: actions/setup-python@v3
+
+    - uses: actions/setup-python@v3
       with:
         python-version: '3.9'
-    
-    - name: Install dependencies
-      run: |
+
+    - run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
-    
-    - name: Run Advanced Model Benchmarking
-      env:
+
+    - env:
         NVIDIA_API_KEY: ${{ secrets.NVIDIA_API_KEY }}
         OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
         ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
@@ -36,27 +30,20 @@ jobs:
       run: |
         cd tests
         python benchmark.py
-    
-    - name: Upload Performance Artifacts
-      uses: actions/upload-artifact@v4
+
+    - uses: actions/upload-artifact@v4
       with:
-        name: model-performance-reports
+        name: reports
         path: |
           reports/comprehensive_benchmark_report.json
           reports/model_performance.db
           reports/*.html
         retention-days: 30
-    
-    - name: Notify Performance Insights
-      uses: 8398a7/action-slack@v3
+
+    - uses: 8398a7/action-slack@v3
       if: always()
       with:
         status: ${{ job.status }}
-        text: |
-          AI Model Performance Benchmark Completed! 
-          Reports Generated: 
-          - Comprehensive JSON Report
-          - SQLite Performance Database
-          - Interactive Visualizations
+        text: benchmark completed
         webhook_url: ${{ secrets.SLACK_WEBHOOK }}
 

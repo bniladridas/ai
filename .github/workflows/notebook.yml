@@ -1,7 +1,4 @@
-# Future Improvements Needed
-# Areas for improvement: enhanced validation rules, automated repairs
-
-name: Jupyter Notebook Validator
+name: notebook
 
 on:
   push:
@@ -12,32 +9,28 @@ on:
       - '**.ipynb'
 
 jobs:
-  validate-notebooks:
+  test:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
-    
-    - name: Set up Python
-      uses: actions/setup-python@v3
+
+    - uses: actions/setup-python@v3
       with:
         python-version: '3.8'
-    
-    - name: Install dependencies
-      run: |
+
+    - run: |
         python -m pip install --upgrade pip
         pip install nbformat jupyter
-    
-    - name: Validate and Repair Notebooks
-      id: repair
+
+    - id: repair
       run: python validate.py
-    
-    - name: Commit repaired notebooks
-      if: failure() && steps.repair.outcome == 'failure'
+
+    - if: failure() && steps.repair.outcome == 'failure'
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
         git config --local user.email "action@github.com"
         git config --local user.name "GitHub Action"
         git add *.ipynb
-        git commit -m "Auto-repair Jupyter notebooks" || exit 0
+        git commit -m "repair" || exit 0
         git push
