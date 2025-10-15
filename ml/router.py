@@ -16,7 +16,7 @@ class AdaptiveModelSelector:
     and historical performance.
     """
 
-    def __init__(self, performance_db_path='reports/model_performance.db'):
+    def __init__(self, performance_db_path="reports/model_performance.db"):
         """
         Initialize the adaptive model selector with performance database.
 
@@ -24,19 +24,14 @@ class AdaptiveModelSelector:
         """
         self.performance_db_path = performance_db_path
         self.models = [
-            'gpt-4o',
-            'deepseek-r1',
-            'claude-3-5-sonnet-20241022',
-            'gemini-2.0-flash-exp'
+            "gpt-4o",
+            "deepseek-r1",
+            "claude-3-5-sonnet-20241022",
+            "gemini-2.0-flash-exp",
         ]
 
         # Task complexity mapping
-        self.task_complexity_weights = {
-            'low': 0.2,
-            'medium': 0.5,
-            'high': 0.8,
-            'extreme': 1.0
-        }
+        self.task_complexity_weights = {"low": 0.2, "medium": 0.5, "high": 0.8, "extreme": 1.0}
 
     def _load_historical_performance(self) -> pd.DataFrame:
         """
@@ -53,7 +48,9 @@ class AdaptiveModelSelector:
             print(f"Error loading performance data: {e}")
             return pd.DataFrame()
 
-    def _calculate_model_score(self, model_metrics: dict[str, float], task_complexity: str) -> float:
+    def _calculate_model_score(
+        self, model_metrics: dict[str, float], task_complexity: str
+    ) -> float:
         """
         Calculate a comprehensive score for a model based on various metrics.
 
@@ -64,22 +61,22 @@ class AdaptiveModelSelector:
         complexity_weight = self.task_complexity_weights.get(task_complexity, 0.5)
 
         # Weighted scoring components
-        response_time_score = 1 / (model_metrics.get('avg_response_time', 1000))
-        token_efficiency_score = model_metrics.get('avg_token_generation_rate', 50) / 100
-        success_rate_score = model_metrics.get('task_success_rate', 50) / 100
-        error_rate_penalty = 1 - (model_metrics.get('error_rate', 10) / 100)
+        response_time_score = 1 / (model_metrics.get("avg_response_time", 1000))
+        token_efficiency_score = model_metrics.get("avg_token_generation_rate", 50) / 100
+        success_rate_score = model_metrics.get("task_success_rate", 50) / 100
+        error_rate_penalty = 1 - (model_metrics.get("error_rate", 10) / 100)
 
         # Composite score calculation
         composite_score = (
-            (0.3 * response_time_score) +
-            (0.3 * token_efficiency_score) +
-            (0.2 * success_rate_score) +
-            (0.2 * error_rate_penalty)
+            (0.3 * response_time_score)
+            + (0.3 * token_efficiency_score)
+            + (0.2 * success_rate_score)
+            + (0.2 * error_rate_penalty)
         ) * complexity_weight
 
         return composite_score
 
-    def select_optimal_model(self, task_description: str, task_complexity: str = 'medium') -> str:
+    def select_optimal_model(self, task_description: str, task_complexity: str = "medium") -> str:
         """
         Select the most appropriate model for a given task.
 
@@ -96,7 +93,9 @@ class AdaptiveModelSelector:
         # Calculate scores for each model
         model_scores = {}
         for model in self.models:
-            model_metrics = historical_data[historical_data['model_name'] == model].iloc[-1].to_dict()
+            model_metrics = (
+                historical_data[historical_data["model_name"] == model].iloc[-1].to_dict()
+            )
             model_scores[model] = self._calculate_model_score(model_metrics, task_complexity)
 
         # Select model with highest score
@@ -107,7 +106,9 @@ class AdaptiveModelSelector:
 
         return recommended_model
 
-    def _log_model_selection(self, selected_model: str, task_description: str, task_complexity: str):
+    def _log_model_selection(
+        self, selected_model: str, task_description: str, task_complexity: str
+    ):
         """
         Log model selection details for future analysis.
 
@@ -116,19 +117,19 @@ class AdaptiveModelSelector:
         :param task_complexity: Task complexity level
         """
         log_entry = {
-            'timestamp': datetime.now().isoformat(),
-            'selected_model': selected_model,
-            'task_description': task_description,
-            'task_complexity': task_complexity
+            "timestamp": datetime.now().isoformat(),
+            "selected_model": selected_model,
+            "task_description": task_description,
+            "task_complexity": task_complexity,
         }
 
         # Ensure logs directory exists
-        os.makedirs('logs', exist_ok=True)
+        os.makedirs("logs", exist_ok=True)
 
         # Append to model selection log
-        log_file = 'logs/model_selection.jsonl'
-        with open(log_file, 'a') as f:
-            f.write(json.dumps(log_entry) + '\n')
+        log_file = "logs/model_selection.jsonl"
+        with open(log_file, "a") as f:
+            f.write(json.dumps(log_entry) + "\n")
 
     def visualize_model_performance(self):
         """
@@ -144,32 +145,33 @@ class AdaptiveModelSelector:
         # Response Time Comparison
         fig_response_time = go.Figure()
         for model in self.models:
-            model_data = historical_data[historical_data['model_name'] == model]
-            fig_response_time.add_trace(go.Bar(
-                x=[model],
-                y=[model_data['avg_response_time'].mean()],
-                name='Avg Response Time'
-            ))
+            model_data = historical_data[historical_data["model_name"] == model]
+            fig_response_time.add_trace(
+                go.Bar(
+                    x=[model], y=[model_data["avg_response_time"].mean()], name="Avg Response Time"
+                )
+            )
         fig_response_time.update_layout(
-            title='Average Model Response Time',
-            yaxis_title='Response Time (ms)'
+            title="Average Model Response Time", yaxis_title="Response Time (ms)"
         )
-        pio.write_html(fig_response_time, file='reports/model_response_time.html')
+        pio.write_html(fig_response_time, file="reports/model_response_time.html")
 
         # Token Generation Rate
         fig_token_rate = go.Figure()
         for model in self.models:
-            model_data = historical_data[historical_data['model_name'] == model]
-            fig_token_rate.add_trace(go.Bar(
-                x=[model],
-                y=[model_data['avg_token_generation_rate'].mean()],
-                name='Avg Token Generation Rate'
-            ))
+            model_data = historical_data[historical_data["model_name"] == model]
+            fig_token_rate.add_trace(
+                go.Bar(
+                    x=[model],
+                    y=[model_data["avg_token_generation_rate"].mean()],
+                    name="Avg Token Generation Rate",
+                )
+            )
         fig_token_rate.update_layout(
-            title='Average Token Generation Rate',
-            yaxis_title='Tokens per Second'
+            title="Average Token Generation Rate", yaxis_title="Tokens per Second"
         )
-        pio.write_html(fig_token_rate, file='reports/token_generation_rate.html')
+        pio.write_html(fig_token_rate, file="reports/token_generation_rate.html")
+
 
 def main():
     """
@@ -182,20 +184,18 @@ def main():
         {"description": "Generate technical documentation", "complexity": "medium"},
         {"description": "Complex code generation", "complexity": "high"},
         {"description": "Multilingual translation", "complexity": "extreme"},
-        {"description": "Simple text summarization", "complexity": "low"}
+        {"description": "Simple text summarization", "complexity": "low"},
     ]
 
     print("Adaptive Model Selector")
     for task in tasks:
-        recommended_model = selector.select_optimal_model(
-            task['description'],
-            task['complexity']
-        )
+        recommended_model = selector.select_optimal_model(task["description"], task["complexity"])
         print(f"Task: {task['description']} (Complexity: {task['complexity']})")
         print(f"Recommended Model: {recommended_model}\n")
 
     # Generate performance visualizations
     selector.visualize_model_performance()
+
 
 if __name__ == "__main__":
     main()
