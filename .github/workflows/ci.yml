@@ -23,11 +23,55 @@ jobs:
         pip install -r requirements.txt
         pip install pytest
 
-    - env:
-        NVIDIA_API_KEY: ${{ secrets.NVIDIA_API_KEY }}
-        OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-        ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-        GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
+     - env:
+         NVIDIA_API_KEY: ${{ secrets.NVIDIA_API_KEY }}
+         OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+         ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+         GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
+       run: |
+         cd tests
+         pytest rate.py validator.py -v
+
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Build Docker image
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        push: false
+        tags: ai-benchmark:test
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+
+    - name: Test Docker image
       run: |
-        cd tests
-        pytest rate.py validator.py -v
+        # Create test env file
+        cat > .env << EOF
+        NVIDIA_API_KEY=test_key
+        OPENAI_API_KEY=test_key
+        ANTHROPIC_API_KEY=test_key
+        GOOGLE_API_KEY=test_key
+        EOF
+
+        # Test if container starts (without API calls)
+        docker run -d --name test-container -p 8501:8501 --env-file .env ai-benchmark:test
+        sleep 10
+
+        # Check if Streamlit is running
+        if curl -f http://localhost:8501/_stcore/health; then
+          echo "Docker container health check passed"
+        else
+          echo "Docker container health check failed"
+          docker logs test-container
+          exit 1
+        fi
+
+        # Cleanup
+        docker stop test-container
+        docker rm test-container
