@@ -10,6 +10,9 @@ env
 secrets.json
 config.json
 
+# Coverage
+.coverage
+
 # Virtual Environments
 venv/
 .venv/
