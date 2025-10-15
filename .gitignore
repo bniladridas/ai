@@ -22,6 +22,10 @@ coverage.xml
 # Benchmarks
 .benchmarks/
 
+# Reports
+reports/*.db
+reports/*.html
+
 # Virtual Environments
 venv/
 .venv/
