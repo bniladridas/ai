@@ -6,7 +6,7 @@ import sqlite3
 from datetime import datetime, timedelta
 
 class AIModelPerformanceDashboard:
-    def __init__(self, db_path='../tests/reports/model_performance.db'):
+    def __init__(self, db_path='../reports/model_performance.db'):
         self.conn = sqlite3.connect(db_path)
         self.load_performance_data()
     
