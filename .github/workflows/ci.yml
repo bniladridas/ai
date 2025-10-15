@@ -90,5 +90,5 @@ jobs:
 
     - name: Test CLI
       run: |
-        cd e2e
+        cd tests/e2e
         python -m pytest cli.py -v
