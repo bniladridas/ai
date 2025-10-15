@@ -35,7 +35,7 @@ jobs:
         GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
       run: |
         cd tests
-        python advanced_benchmarking.py
+        python benchmark.py
     
     - name: Upload Performance Artifacts
       uses: actions/upload-artifact@v4
