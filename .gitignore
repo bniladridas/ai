@@ -19,6 +19,9 @@ coverage.xml
 # Ruff cache
 .ruff_cache/
 
+# Benchmarks
+.benchmarks/
+
 # Virtual Environments
 venv/
 .venv/
