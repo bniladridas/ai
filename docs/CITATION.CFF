@@ -1,0 +1,18 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+title: "DeepSeek AI Exploration"
+version: 1.0.0
+authors:
+  - name: "Niladri Das"
+    orcid: "https://orcid.org/0009-0002-6619-5691"
+    affiliation: "NVIDIA Developer Program"
+date-released: 2025-03-29
+repository-code: "https://github.com/bniladridas/deepseek-ai-exploration"
+keywords:
+  - DeepSeek-R1
+  - AI model
+  - Python
+  - Node.js
+  - Bash
+  - NVIDIA Developer Program
+license: "MIT"

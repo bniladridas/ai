@@ -1,0 +1,32 @@
+#!/bin/bash
+
+# Conventional Commit Hook
+# Enforces conventional commit standards
+
+COMMIT_MSG_FILE=$1
+COMMIT_MSG=$(cat $COMMIT_MSG_FILE)
+
+# Extract first line
+FIRST_LINE=$(echo "$COMMIT_MSG" | head -n1)
+
+# Check if first line is lowercase
+if [[ "$FIRST_LINE" != "$(echo "$FIRST_LINE" | tr '[:upper:]' '[:lower:]')" ]]; then
+    echo "Error: Commit message first line must be lowercase."
+    exit 1
+fi
+
+# Check length <= 30 chars
+if [[ ${#FIRST_LINE} -gt 30 ]]; then
+    echo "Error: Commit message first line must be 30 characters or less."
+    exit 1
+fi
+
+# Check starts with conventional type
+TYPES="feat|fix|docs|style|refactor|test|chore|perf|ci|build|revert"
+if ! echo "$FIRST_LINE" | grep -qE "^($TYPES):"; then
+    echo "Error: Commit message must start with a conventional type: $TYPES"
+    exit 1
+fi
+
+echo "Commit message follows conventional standards."
+exit 0
