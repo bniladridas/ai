@@ -12,7 +12,10 @@ load_dotenv()
 class TestDeepSeekPerformanceAndRateLimiting:
     def setup_method(self):
         """Initialize OpenAI client with NVIDIA endpoint"""
-        openai.api_key = os.getenv('NVIDIA_API_KEY')
+        api_key = os.getenv('NVIDIA_API_KEY')
+        if not api_key:
+            pytest.skip("NVIDIA_API_KEY not set")
+        openai.api_key = api_key
         openai.api_base = "https://integrate.api.nvidia.com/v1"
         
         # Performance thresholds
