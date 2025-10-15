@@ -91,4 +91,4 @@ jobs:
     - name: Test CLI
       run: |
         cd tests
-        python -m pytest test_cli.py -v
+        python -m pytest cli.py -v
