@@ -9,7 +9,6 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
-
     steps:
     - uses: actions/checkout@v4
 
@@ -28,21 +27,21 @@ jobs:
         ruff check .
         ruff format --check .
 
-     - env:
-         NVIDIA_API_KEY: ${{ secrets.NVIDIA_API_KEY }}
-         OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-         ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-         GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
-       run: |
-         cd tests/integration
-         pytest --cov=ml --cov=cli --cov-report=xml --cov-report=html rate.py validator.py router.py -v
+    - env:
+        NVIDIA_API_KEY: ${{ secrets.NVIDIA_API_KEY }}
+        OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
+      run: |
+        cd tests/integration
+        pytest --cov=ml --cov=cli --cov-report=xml --cov-report=html rate.py validator.py router.py -v
 
-     - name: Upload coverage reports
-       uses: codecov/codecov-action@v4
-       with:
-         file: ./tests/integration/coverage.xml
-         flags: integration
-         name: integration-coverage
+    - name: Upload coverage reports
+      uses: codecov/codecov-action@v4
+      with:
+        file: ./tests/integration/coverage.xml
+        flags: integration
+        name: integration-coverage
 
   docker:
     runs-on: ubuntu-latest
@@ -63,25 +62,17 @@ jobs:
     - name: Test Docker image
       run: |
         # Create test env file
-        cat > .env << 'EOF'
-        NVIDIA_API_KEY=test_key
-        OPENAI_API_KEY=test_key
-        ANTHROPIC_API_KEY=test_key
-        GOOGLE_API_KEY=test_key
-        EOF
+        echo "NVIDIA_API_KEY=test_key" > .env
+        echo "OPENAI_API_KEY=test_key" >> .env
+        echo "ANTHROPIC_API_KEY=test_key" >> .env
+        echo "GOOGLE_API_KEY=test_key" >> .env
 
         # Test if container starts (without API calls)
         docker run -d --name test-container -p 8501:8501 --env-file .env ai-benchmark:test
         sleep 10
 
         # Check if Streamlit is running
-        if curl -f http://localhost:8501/_stcore/health; then
-          echo "Docker container health check passed"
-        else
-          echo "Docker container health check failed"
-          docker logs test-container
-          exit 1
-        fi
+        curl -f http://localhost:8501/_stcore/health && echo "Docker container health check passed" || (echo "Docker container health check failed"; docker logs test-container; exit 1)
 
         # Cleanup
         docker stop test-container
