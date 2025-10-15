@@ -31,15 +31,8 @@ jobs:
       with:
         name: reports
         path: |
-          reports/comprehensive_benchmark_report.json
-          reports/model_performance.db
+          reports/*.json
+          reports/*.db
           reports/*.html
         retention-days: 30
-
-    - uses: 8398a7/action-slack@v3
-      if: always()
-      with:
-        status: ${{ job.status }}
-        text: benchmark completed
-        webhook_url: ${{ secrets.SLACK_WEBHOOK_URL }}
 
