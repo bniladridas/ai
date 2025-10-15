@@ -71,11 +71,11 @@ class TestAdaptiveModelSelector:
         # Create mock historical data
         mock_df = pd.DataFrame(
             {
-                "model_name": ["gpt-4o", "deepseek-r1", "gpt-4o"],
-                "avg_response_time": [1000, 1500, 1200],
-                "avg_token_generation_rate": [60, 40, 55],
-                "task_success_rate": [95, 85, 90],
-                "error_rate": [5, 15, 10],
+                "model_name": ["gpt-4o", "deepseek-r1", "gpt-4o", "claude-3-5-sonnet-20241022", "gemini-2.0-flash-exp"],
+                "avg_response_time": [1000, 1500, 1200, 1100, 1300],
+                "avg_token_generation_rate": [60, 40, 55, 50, 45],
+                "task_success_rate": [95, 85, 90, 92, 88],
+                "error_rate": [5, 15, 10, 8, 12],
             }
         )
 
