@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# Script to rewrite commit messages for conventional standards
-# Makes first line lowercase and truncates to 60 characters
+# Script to rewrite commit messages
+# Makes first line lowercase, truncates to 30 characters, removes types
 
 git filter-branch --env-filter '
     export GIT_AUTHOR_NAME="Niladri Das"
@@ -17,6 +17,8 @@ git filter-branch --env-filter '
     first_line=$(echo "$first_line" | tr "[:upper:]" "[:lower:]")
     # Truncate to 30 chars
     first_line=$(echo "$first_line" | cut -c1-30)
+    # Remove conventional type if present
+    first_line=$(echo "$first_line" | sed 's/^[a-z]*: //')
     # Reconstruct message
     rest=$(echo "$msg" | tail -n +2)
     echo "$first_line"

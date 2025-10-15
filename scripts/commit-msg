@@ -21,12 +21,7 @@ if [[ ${#FIRST_LINE} -gt 30 ]]; then
     exit 1
 fi
 
-# Check starts with conventional type
-TYPES="feat|fix|docs|style|refactor|test|chore|perf|ci|build|revert"
-if ! echo "$FIRST_LINE" | grep -qE "^($TYPES):"; then
-    echo "Error: Commit message must start with a conventional type: $TYPES"
-    exit 1
-fi
+# Allow one-word messages
 
 echo "Commit message follows conventional standards."
 exit 0

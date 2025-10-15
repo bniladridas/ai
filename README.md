@@ -58,9 +58,8 @@ This project follows conventional commit standards to maintain a clean and consi
    ```
 
 ### Commit Message Format
-- Start with a type: `feat:`, `fix:`, `docs:`, `style:`, `refactor:`, `test:`, `chore:`, `perf:`, `ci:`, `build:`, `revert:`
-- First line lowercase, ≤30 characters
-- Example: `feat: add dashboard`
+- One word, lowercase, ≤30 characters
+- Example: `deepseek`
 
 ### History Cleanup
 To rewrite existing commit messages:
