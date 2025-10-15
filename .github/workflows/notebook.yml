@@ -2,11 +2,9 @@ name: notebook
 
 on:
   push:
-    paths:
-      - '**.ipynb'
+    branches: [ main ]
   pull_request:
-    paths:
-      - '**.ipynb'
+    branches: [ main ]
 
 jobs:
   test:
