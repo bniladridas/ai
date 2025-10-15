@@ -1,17 +1,18 @@
-import os
 import json
+import os
 import sqlite3
 import time
+from dataclasses import asdict, dataclass
 from datetime import datetime
-import plotly.graph_objects as go
-import plotly.io as pio
-import numpy as np
-from dataclasses import dataclass, asdict
-from typing import List, Dict, Any
-from dotenv import load_dotenv
-from openai import OpenAI
+from typing import Any
+
 import anthropic  # Added for Claude support
 import google.generativeai as palm  # Added for PaLM support
+import numpy as np
+import plotly.graph_objects as go
+import plotly.io as pio
+from dotenv import load_dotenv
+from openai import OpenAI
 
 # Load environment variables
 load_dotenv()
@@ -29,11 +30,11 @@ class ModelPerformanceMetrics:
     total_execution_time: float
 
 class AdvancedModelBenchmark:
-    def __init__(self, models: List[Dict[str, Any]]):
+    def __init__(self, models: list[dict[str, Any]]):
         """Initialize benchmark with multiple models and their configurations"""
         self.models = models
         self.clients = self._initialize_clients()
-        
+
         # Expanded real-world use case scenarios
         self.scenarios = [
             {
@@ -57,19 +58,19 @@ class AdvancedModelBenchmark:
                 "complexity": "high"
             }
         ]
-        
+
         # Ensure reports directory exists
         os.makedirs('reports', exist_ok=True)
-        
+
         # Initialize SQLite database
         self._initialize_database()
-    
-    def _initialize_clients(self) -> Dict[str, Any]:
+
+    def _initialize_clients(self) -> dict[str, Any]:
         """Initialize clients for different models"""
         clients = {}
         for model_config in self.models:
             model_type = model_config['type']
-            
+
             if model_type == 'openai':
                 clients[model_config['name']] = OpenAI(
                     api_key=os.getenv('OPENAI_API_KEY')
@@ -86,14 +87,14 @@ class AdvancedModelBenchmark:
                     base_url="https://integrate.api.nvidia.com/v1",
                     api_key=os.getenv('NVIDIA_API_KEY')
                 )
-        
+
         return clients
-    
+
     def _initialize_database(self):
         """Create SQLite database for performance tracking"""
         self.conn = sqlite3.connect('reports/model_performance.db')
         cursor = self.conn.cursor()
-        
+
         cursor.execute('''
         CREATE TABLE IF NOT EXISTS performance_metrics (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -109,14 +110,14 @@ class AdvancedModelBenchmark:
         )
         ''')
         self.conn.commit()
-    
+
     def _log_performance_to_database(self, metrics: ModelPerformanceMetrics):
         """Log performance metrics to SQLite database"""
         cursor = self.conn.cursor()
         cursor.execute('''
         INSERT INTO performance_metrics (
-            timestamp, model_name, total_queries, avg_response_time, 
-            median_response_time, avg_token_generation_rate, 
+            timestamp, model_name, total_queries, avg_response_time,
+            median_response_time, avg_token_generation_rate,
             task_success_rate, error_rate, total_execution_time
         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
         ''', (
@@ -126,8 +127,8 @@ class AdvancedModelBenchmark:
             metrics.error_rate, metrics.total_execution_time
         ))
         self.conn.commit()
-    
-    def _generate_performance_visualization(self, all_metrics: List[ModelPerformanceMetrics]):
+
+    def _generate_performance_visualization(self, all_metrics: list[ModelPerformanceMetrics]):
         """Create interactive Plotly visualizations"""
         # Response Time Comparison
         fig_response_time = go.Figure()
@@ -142,7 +143,7 @@ class AdvancedModelBenchmark:
             yaxis_title='Response Time (ms)'
         )
         pio.write_html(fig_response_time, file='reports/response_time_comparison.html')
-        
+
         # Token Generation Rate
         fig_token_rate = go.Figure()
         for metrics in all_metrics:
@@ -156,12 +157,12 @@ class AdvancedModelBenchmark:
             yaxis_title='Tokens per Second'
         )
         pio.write_html(fig_token_rate, file='reports/token_generation_rate.html')
-    
-    def run_benchmark(self) -> List[ModelPerformanceMetrics]:
+
+    def run_benchmark(self) -> list[ModelPerformanceMetrics]:
         """Run comprehensive benchmarking across models and scenarios"""
         all_metrics = []
         timestamp = datetime.now().isoformat()
-        
+
         for model_config in self.models:
             model_name = model_config['name']
             model_results = {
@@ -170,7 +171,7 @@ class AdvancedModelBenchmark:
                 "error_count": 0,
                 "total_time": 0
             }
-            
+
             for scenario in self.scenarios:
                 try:
                     result = self._evaluate_model(model_name, scenario)
@@ -181,7 +182,7 @@ class AdvancedModelBenchmark:
                 except Exception as e:
                     print(f"Error evaluating {model_name}: {e}")
                     model_results['error_count'] += len(self.scenarios)
-            
+
             metrics = ModelPerformanceMetrics(
                 timestamp=timestamp,
                 model_name=model_name,
@@ -193,16 +194,16 @@ class AdvancedModelBenchmark:
                 error_rate=(model_results['error_count'] / len(self.scenarios)) * 100,
                 total_execution_time=model_results['total_time']
             )
-            
+
             all_metrics.append(metrics)
             self._log_performance_to_database(metrics)
-        
+
         # Generate visualizations
         self._generate_performance_visualization(all_metrics)
-        
+
         return all_metrics
-    
-    def _evaluate_model(self, model_name: str, scenario: Dict[str, Any]) -> Dict[str, Any]:
+
+    def _evaluate_model(self, model_name: str, scenario: dict[str, Any]) -> dict[str, Any]:
         """Evaluate a specific model's performance on a scenario"""
         start_time = time.time()
         success_count = 0
@@ -216,7 +217,7 @@ class AdvancedModelBenchmark:
 
             # Call the appropriate API based on model type
             if model_type == 'openai':
-                response = client.chat.completions.create(
+                client.chat.completions.create(
                     model=model_name,
                     messages=[{"role": "user", "content": scenario["prompt"]}],
                     max_tokens=1000,
@@ -226,7 +227,7 @@ class AdvancedModelBenchmark:
                 response_times.append((time.time() - start_time) * 1000)
 
             elif model_type == 'anthropic':
-                response = client.messages.create(
+                client.messages.create(
                     model=model_name,
                     max_tokens=1000,
                     messages=[{"role": "user", "content": scenario["prompt"]}]
@@ -235,12 +236,12 @@ class AdvancedModelBenchmark:
                 response_times.append((time.time() - start_time) * 1000)
 
             elif model_type == 'google':
-                response = client.generate_content(scenario["prompt"])
+                client.generate_content(scenario["prompt"])
                 success_count = 1
                 response_times.append((time.time() - start_time) * 1000)
 
             elif model_type == 'deepseek':
-                response = client.chat.completions.create(
+                client.chat.completions.create(
                     model=model_name,
                     messages=[{"role": "user", "content": scenario["prompt"]}],
                     max_tokens=1000,
@@ -249,7 +250,7 @@ class AdvancedModelBenchmark:
                 success_count = 1
                 response_times.append((time.time() - start_time) * 1000)
 
-        except Exception as e:
+        except Exception:
             error_count = 1
             response_times.append((time.time() - start_time) * 1000)
 
@@ -267,10 +268,10 @@ def main():
         {"name": "claude-3-5-sonnet-20241022", "type": "anthropic"},
         {"name": "gemini-2.0-flash-exp", "type": "google"}
     ]
-    
+
     benchmark = AdvancedModelBenchmark(models)
     results = benchmark.run_benchmark()
-    
+
     # Generate comprehensive JSON report
     with open('reports/comprehensive_benchmark_report.json', 'w') as f:
         json.dump([asdict(result) for result in results], f, indent=2)

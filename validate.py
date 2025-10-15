@@ -1,11 +1,11 @@
-import os
 import json
-import nbformat
+import os
+
 
 def repair_notebook(notebook_path):
     try:
         # Read the notebook
-        with open(notebook_path, 'r') as f:
+        with open(notebook_path) as f:
             notebook = json.load(f)
 
         # Flag to track if changes were made
@@ -37,7 +37,7 @@ def repair_notebook(notebook_path):
 
 # Find and repair notebooks
 modified_notebooks = []
-for root, dirs, files in os.walk('.'):
+for root, _dirs, files in os.walk('.'):
     for file in files:
         if file.endswith('.ipynb'):
             notebook_path = os.path.join(root, file)

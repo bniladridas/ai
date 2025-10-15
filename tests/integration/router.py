@@ -1,10 +1,12 @@
-import pytest
+import os
 import sqlite3
 import tempfile
-import os
-from unittest.mock import patch, MagicMock
+from unittest.mock import MagicMock, patch
+
 import pandas as pd
+
 from ml.router import AdaptiveModelSelector
+
 
 class TestAdaptiveModelSelector:
     def setup_method(self):

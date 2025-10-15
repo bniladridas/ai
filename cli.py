@@ -3,12 +3,14 @@ import argparse
 import os
 import sys
 from pathlib import Path
+
 from dotenv import load_dotenv
 
 load_dotenv()
 sys.path.insert(0, str(Path(__file__).parent))
 
-from ml.router import AdaptiveModelSelector
+from ml.router import AdaptiveModelSelector  # noqa: E402
+
 
 def benchmark(args):
     required_keys = ['NVIDIA_API_KEY', 'OPENAI_API_KEY', 'ANTHROPIC_API_KEY', 'GOOGLE_API_KEY']
@@ -17,7 +19,7 @@ def benchmark(args):
         print(f"missing api keys: {', '.join(missing)}")
         return
 
-    from tests.benchmark import AdvancedModelBenchmark
+    from tests.integration.benchmark import AdvancedModelBenchmark
     models = [
         {"name": "gpt-4o", "type": "openai"},
         {"name": "deepseek-r1", "type": "deepseek"},
@@ -53,7 +55,7 @@ def models(args):
         ("gemini-2.0-flash-exp", "google", "experimental")
     ]
     for name, provider, desc in models:
-        print("20")
+        print(f"{name}: {provider} ({desc})")
 
 def status(args):
     keys = {
@@ -99,3 +101,4 @@ def main():
 
 if __name__ == '__main__':
     main()
+

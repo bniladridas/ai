@@ -1,24 +1,25 @@
-import os
 import json
+import os
 import sqlite3
 from datetime import datetime
-from typing import Dict, List, Any
+
 import numpy as np
 import pandas as pd
 import plotly.graph_objects as go
 import plotly.io as pio
 
+
 class AdaptiveModelSelector:
     """
-    Intelligent model selection framework that dynamically chooses 
-    the most appropriate AI model based on task characteristics 
+    Intelligent model selection framework that dynamically chooses
+    the most appropriate AI model based on task characteristics
     and historical performance.
     """
-    
+
     def __init__(self, performance_db_path='reports/model_performance.db'):
         """
         Initialize the adaptive model selector with performance database.
-        
+
         :param performance_db_path: Path to SQLite performance tracking database
         """
         self.performance_db_path = performance_db_path
@@ -28,7 +29,7 @@ class AdaptiveModelSelector:
             'claude-3-5-sonnet-20241022',
             'gemini-2.0-flash-exp'
         ]
-        
+
         # Task complexity mapping
         self.task_complexity_weights = {
             'low': 0.2,
@@ -36,11 +37,11 @@ class AdaptiveModelSelector:
             'high': 0.8,
             'extreme': 1.0
         }
-    
+
     def _load_historical_performance(self) -> pd.DataFrame:
         """
         Load historical performance metrics from SQLite database.
-        
+
         :return: DataFrame with performance metrics
         """
         try:
@@ -51,23 +52,23 @@ class AdaptiveModelSelector:
         except Exception as e:
             print(f"Error loading performance data: {e}")
             return pd.DataFrame()
-    
-    def _calculate_model_score(self, model_metrics: Dict[str, float], task_complexity: str) -> float:
+
+    def _calculate_model_score(self, model_metrics: dict[str, float], task_complexity: str) -> float:
         """
         Calculate a comprehensive score for a model based on various metrics.
-        
+
         :param model_metrics: Dictionary of model performance metrics
         :param task_complexity: Complexity level of the task
         :return: Composite performance score
         """
         complexity_weight = self.task_complexity_weights.get(task_complexity, 0.5)
-        
+
         # Weighted scoring components
         response_time_score = 1 / (model_metrics.get('avg_response_time', 1000))
         token_efficiency_score = model_metrics.get('avg_token_generation_rate', 50) / 100
         success_rate_score = model_metrics.get('task_success_rate', 50) / 100
         error_rate_penalty = 1 - (model_metrics.get('error_rate', 10) / 100)
-        
+
         # Composite score calculation
         composite_score = (
             (0.3 * response_time_score) +
@@ -75,41 +76,41 @@ class AdaptiveModelSelector:
             (0.2 * success_rate_score) +
             (0.2 * error_rate_penalty)
         ) * complexity_weight
-        
+
         return composite_score
-    
+
     def select_optimal_model(self, task_description: str, task_complexity: str = 'medium') -> str:
         """
         Select the most appropriate model for a given task.
-        
+
         :param task_description: Natural language description of the task
         :param task_complexity: Complexity level of the task
         :return: Recommended model name
         """
         historical_data = self._load_historical_performance()
-        
+
         if historical_data.empty:
             # Fallback to random selection if no historical data
             return np.random.choice(self.models)
-        
+
         # Calculate scores for each model
         model_scores = {}
         for model in self.models:
             model_metrics = historical_data[historical_data['model_name'] == model].iloc[-1].to_dict()
             model_scores[model] = self._calculate_model_score(model_metrics, task_complexity)
-        
+
         # Select model with highest score
         recommended_model = max(model_scores, key=model_scores.get)
-        
+
         # Log model selection
         self._log_model_selection(recommended_model, task_description, task_complexity)
-        
+
         return recommended_model
-    
+
     def _log_model_selection(self, selected_model: str, task_description: str, task_complexity: str):
         """
         Log model selection details for future analysis.
-        
+
         :param selected_model: Name of the selected model
         :param task_description: Task description
         :param task_complexity: Task complexity level
@@ -120,26 +121,26 @@ class AdaptiveModelSelector:
             'task_description': task_description,
             'task_complexity': task_complexity
         }
-        
+
         # Ensure logs directory exists
         os.makedirs('logs', exist_ok=True)
-        
+
         # Append to model selection log
         log_file = 'logs/model_selection.jsonl'
         with open(log_file, 'a') as f:
             f.write(json.dumps(log_entry) + '\n')
-    
+
     def visualize_model_performance(self):
         """
         Create interactive visualizations of model performance.
         Generates HTML reports in the reports directory.
         """
         historical_data = self._load_historical_performance()
-        
+
         if historical_data.empty:
             print("No performance data available for visualization.")
             return
-        
+
         # Response Time Comparison
         fig_response_time = go.Figure()
         for model in self.models:
@@ -154,7 +155,7 @@ class AdaptiveModelSelector:
             yaxis_title='Response Time (ms)'
         )
         pio.write_html(fig_response_time, file='reports/model_response_time.html')
-        
+
         # Token Generation Rate
         fig_token_rate = go.Figure()
         for model in self.models:
@@ -175,7 +176,7 @@ def main():
     Demonstration of Adaptive Model Selector
     """
     selector = AdaptiveModelSelector()
-    
+
     # Example task scenarios
     tasks = [
         {"description": "Generate technical documentation", "complexity": "medium"},
@@ -183,16 +184,16 @@ def main():
         {"description": "Multilingual translation", "complexity": "extreme"},
         {"description": "Simple text summarization", "complexity": "low"}
     ]
-    
+
     print("Adaptive Model Selector")
     for task in tasks:
         recommended_model = selector.select_optimal_model(
-            task['description'], 
+            task['description'],
             task['complexity']
         )
         print(f"Task: {task['description']} (Complexity: {task['complexity']})")
         print(f"Recommended Model: {recommended_model}\n")
-    
+
     # Generate performance visualizations
     selector.visualize_model_performance()
 
