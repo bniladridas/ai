@@ -23,14 +23,21 @@ jobs:
         pip install -r requirements.txt
         pip install pytest
 
-    - env:
-        NVIDIA_API_KEY: ${{ secrets.NVIDIA_API_KEY }}
-        OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-        ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-        GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
+     - env:
+         NVIDIA_API_KEY: ${{ secrets.NVIDIA_API_KEY }}
+         OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+         ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+         GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
        run: |
          cd tests/integration
-         pytest rate.py validator.py -v
+         pytest --cov=ml --cov=cli --cov-report=xml --cov-report=html rate.py validator.py router.py -v
+
+     - name: Upload coverage reports
+       uses: codecov/codecov-action@v4
+       with:
+         file: ./tests/integration/coverage.xml
+         flags: integration
+         name: integration-coverage
 
   docker:
     runs-on: ubuntu-latest
@@ -91,4 +98,11 @@ jobs:
     - name: Test CLI
       run: |
         cd tests/e2e
-        python -m pytest cli.py -v
+        python -m pytest --cov=cli --cov-report=xml --cov-report=html cli.py -v
+
+    - name: Upload CLI coverage
+      uses: codecov/codecov-action@v4
+      with:
+        file: ./tests/e2e/coverage.xml
+        flags: e2e
+        name: e2e-coverage
