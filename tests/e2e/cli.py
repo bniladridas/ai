@@ -63,5 +63,5 @@ def test_cli_invalid_command():
     cli_path = Path(__file__).parent.parent.parent / 'cli.py'
     result = subprocess.run([sys.executable, str(cli_path), 'invalid'],
                           capture_output=True, text=True)
-    assert result.returncode == 0  # argparse exits with 0 for --help equivalent
+    assert result.returncode == 2  # argparse exits with 2 for invalid choice
 
