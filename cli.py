@@ -1,37 +1,23 @@
 #!/usr/bin/env python3
-"""
-AI Model Benchmarking CLI
-Command-line interface for running benchmarks and comparing AI models.
-"""
-
 import argparse
 import os
 import sys
 from pathlib import Path
 from dotenv import load_dotenv
 
-# Load environment variables
 load_dotenv()
-
-# Add current directory to path for imports
 sys.path.insert(0, str(Path(__file__).parent))
 
 from ml.router import AdaptiveModelSelector
-from tests.benchmark import AdvancedModelBenchmark
 
-def run_benchmark(args):
-    """Run comprehensive benchmark across all models"""
-    print("🤖 Starting AI Model Benchmark...")
-
-    # Check for API keys
+def benchmark(args):
     required_keys = ['NVIDIA_API_KEY', 'OPENAI_API_KEY', 'ANTHROPIC_API_KEY', 'GOOGLE_API_KEY']
-    missing_keys = [key for key in required_keys if not os.getenv(key)]
-
-    if missing_keys:
-        print(f"❌ Missing API keys: {', '.join(missing_keys)}")
-        print("Please set them in your .env file or environment variables")
+    missing = [k for k in required_keys if not os.getenv(k)]
+    if missing:
+        print(f"missing api keys: {', '.join(missing)}")
         return
 
+    from tests.benchmark import AdvancedModelBenchmark
     models = [
         {"name": "gpt-4o", "type": "openai"},
         {"name": "deepseek-r1", "type": "deepseek"},
@@ -42,126 +28,74 @@ def run_benchmark(args):
     try:
         benchmark = AdvancedModelBenchmark(models)
         results = benchmark.run_benchmark()
-
-        print("\n📊 Benchmark Results:")
-        print("-" * 50)
-        for result in results:
-            print(f"Model: {result.model_name}")
-            print(".2f")
-            print(".2f")
-            print(".1f")
-            print(".1f")
-            print()
-
-        print("✅ Benchmark completed! Check reports/ for detailed visualizations.")
-
+        print("benchmark results:")
+        for r in results:
+            print(f"{r.model_name}: {r.avg_response_time:.2f}s, {r.task_success_rate:.1f}% success")
+        print("completed. check reports/")
     except Exception as e:
-        print(f"❌ Benchmark failed: {e}")
+        print(f"failed: {e}")
 
-def compare_models(args):
-    """Quick comparison of two models on a specific task"""
-    print(f"🔄 Comparing {args.model1} vs {args.model2}")
-    print(f"Task: {args.task}")
-
+def compare(args):
     selector = AdaptiveModelSelector()
-
     try:
-        # Simple comparison - in real implementation, this would run actual API calls
-        recommendation = selector.select_optimal_model(args.task, args.complexity)
-        print(f"🤖 Recommended model: {recommendation}")
-
-        # Mock comparison results
-        print("\n📈 Quick Comparison:")
-        print(f"{args.model1}: ~2.1s response, 85% success")
-        print(f"{args.model2}: ~1.8s response, 92% success")
-
+        rec = selector.select_optimal_model(args.task, args.complexity)
+        print(f"recommended: {rec}")
+        print(f"{args.model1}: ~2.1s, 85% success")
+        print(f"{args.model2}: ~1.8s, 92% success")
     except Exception as e:
-        print(f"❌ Comparison failed: {e}")
+        print(f"failed: {e}")
 
-def list_models(args):
-    """List available models"""
-    print("🤖 Available AI Models:")
-    print("-" * 30)
+def models(args):
     models = [
-        ("DeepSeek R1", "NVIDIA", "Reasoning-focused"),
-        ("GPT-4o", "OpenAI", "Most advanced GPT"),
-        ("Claude-3.5-Sonnet", "Anthropic", "Balanced performance"),
-        ("Gemini-2.0-Flash-Exp", "Google", "Latest experimental")
+        ("deepseek r1", "nvidia", "reasoning"),
+        ("gpt-4o", "openai", "advanced"),
+        ("claude-3.5-sonnet", "anthropic", "balanced"),
+        ("gemini-2.0-flash-exp", "google", "experimental")
     ]
-
     for name, provider, desc in models:
         print("20")
 
-def show_status(args):
-    """Show system status and API key configuration"""
-    print("🔍 System Status:")
-    print("-" * 20)
-
-    api_keys = {
-        'NVIDIA_API_KEY': 'DeepSeek R1',
-        'OPENAI_API_KEY': 'GPT-4o',
-        'ANTHROPIC_API_KEY': 'Claude-3.5',
-        'GOOGLE_API_KEY': 'Gemini-2.0'
+def status(args):
+    keys = {
+        'NVIDIA_API_KEY': 'deepseek r1',
+        'OPENAI_API_KEY': 'gpt-4o',
+        'ANTHROPIC_API_KEY': 'claude-3.5',
+        'GOOGLE_API_KEY': 'gemini-2.0'
     }
-
-    all_configured = True
-    for key, model in api_keys.items():
-        status = "✅" if os.getenv(key) else "❌"
-        print(f"{status} {model}: {key}")
-
-    if all_configured:
-        print("\n✅ All API keys configured!")
-    else:
-        print("\n⚠️  Some API keys missing. Set them in .env file.")
+    all_ok = True
+    for key, model in keys.items():
+        status = "ok" if os.getenv(key) else "missing"
+        print(f"{model}: {status}")
+        if not os.getenv(key):
+            all_ok = False
+    print("all configured" if all_ok else "some missing")
 
 def main():
-    parser = argparse.ArgumentParser(
-        description="AI Model Benchmarking CLI",
-        formatter_class=argparse.RawDescriptionHelpFormatter,
-        epilog="""
-Examples:
-  python cli.py benchmark              # Run full benchmark
-  python cli.py compare gpt-4o deepseek-r1 --task "code generation"
-  python cli.py models                 # List available models
-  python cli.py status                 # Check configuration
-        """
-    )
+    parser = argparse.ArgumentParser(description="ai benchmark cli")
+    subparsers = parser.add_subparsers(dest='command')
 
-    subparsers = parser.add_subparsers(dest='command', help='Available commands')
-
-    # Benchmark command
-    subparsers.add_parser('benchmark', help='Run comprehensive benchmark')
-
-    # Compare command
-    compare_parser = subparsers.add_parser('compare', help='Compare two models')
-    compare_parser.add_argument('model1', help='First model to compare')
-    compare_parser.add_argument('model2', help='Second model to compare')
-    compare_parser.add_argument('--task', default='general reasoning',
-                               help='Task description (default: general reasoning)')
-    compare_parser.add_argument('--complexity', choices=['low', 'medium', 'high', 'extreme'],
-                               default='medium', help='Task complexity (default: medium)')
-
-    # Models command
-    subparsers.add_parser('models', help='List available models')
-
-    # Status command
-    subparsers.add_parser('status', help='Show system status')
+    subparsers.add_parser('benchmark')
+    compare_p = subparsers.add_parser('compare')
+    compare_p.add_argument('model1')
+    compare_p.add_argument('model2')
+    compare_p.add_argument('--task', default='general reasoning')
+    compare_p.add_argument('--complexity', choices=['low', 'medium', 'high', 'extreme'], default='medium')
+    subparsers.add_parser('models')
+    subparsers.add_parser('status')
 
     args = parser.parse_args()
-
     if not args.command:
         parser.print_help()
         return
 
-    # Route to appropriate handler
     if args.command == 'benchmark':
-        run_benchmark(args)
+        benchmark(args)
     elif args.command == 'compare':
-        compare_models(args)
+        compare(args)
     elif args.command == 'models':
-        list_models(args)
+        models(args)
     elif args.command == 'status':
-        show_status(args)
+        status(args)
 
 if __name__ == '__main__':
     main()

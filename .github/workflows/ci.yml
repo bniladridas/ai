@@ -74,3 +74,21 @@ jobs:
         # Cleanup
         docker stop test-container
         docker rm test-container
+
+  cli:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+
+    - run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: Test CLI
+      run: |
+        cd tests
+        python -m pytest test_cli.py -v
