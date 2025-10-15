@@ -204,16 +204,68 @@ class AdvancedModelBenchmark:
     
     def _evaluate_model(self, model_name: str, scenario: Dict[str, Any]) -> Dict[str, Any]:
         """Evaluate a specific model's performance on a scenario"""
-        # Implementation similar to previous version, adapted for multiple model types
-        # Would include specific logic for each model type's API call
-        pass
+        start_time = time.time()
+        success_count = 0
+        error_count = 0
+        response_times = []
+
+        try:
+            client = self.clients[model_name]
+            model_config = next(m for m in self.models if m['name'] == model_name)
+            model_type = model_config['type']
+
+            # Call the appropriate API based on model type
+            if model_type == 'openai':
+                response = client.chat.completions.create(
+                    model=model_name,
+                    messages=[{"role": "user", "content": scenario["prompt"]}],
+                    max_tokens=1000,
+                    temperature=0.7
+                )
+                success_count = 1
+                response_times.append((time.time() - start_time) * 1000)
+
+            elif model_type == 'anthropic':
+                response = client.messages.create(
+                    model=model_name,
+                    max_tokens=1000,
+                    messages=[{"role": "user", "content": scenario["prompt"]}]
+                )
+                success_count = 1
+                response_times.append((time.time() - start_time) * 1000)
+
+            elif model_type == 'google':
+                response = client.generate_content(scenario["prompt"])
+                success_count = 1
+                response_times.append((time.time() - start_time) * 1000)
+
+            elif model_type == 'deepseek':
+                response = client.chat.completions.create(
+                    model=model_name,
+                    messages=[{"role": "user", "content": scenario["prompt"]}],
+                    max_tokens=1000,
+                    temperature=0.7
+                )
+                success_count = 1
+                response_times.append((time.time() - start_time) * 1000)
+
+        except Exception as e:
+            error_count = 1
+            response_times.append((time.time() - start_time) * 1000)
+
+        return {
+            "response_times": response_times,
+            "success_count": success_count,
+            "error_count": error_count,
+            "total_time": sum(response_times)
+        }
 
 def main():
     models = [
-        {"name": "gpt-3.5-turbo", "type": "openai"},
+        {"name": "gpt-4o", "type": "openai"},
         {"name": "deepseek-r1", "type": "deepseek"},
-        {"name": "claude-2", "type": "anthropic"},
-        {"name": "palm-2", "type": "google"}
+        {"name": "claude-3-5-sonnet-20241022", "type": "anthropic"},
+        {"name": "gemini-1.5-flash", "type": "google"}
     ]
     
     benchmark = AdvancedModelBenchmark(models)

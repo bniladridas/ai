@@ -23,10 +23,10 @@ class AdaptiveModelSelector:
         """
         self.performance_db_path = performance_db_path
         self.models = [
-            'gpt-3.5-turbo', 
-            'deepseek-r1', 
-            'claude-2', 
-            'palm-2'
+            'gpt-4o',
+            'deepseek-r1',
+            'claude-3-5-sonnet-20241022',
+            'gemini-1.5-flash'
         ]
         
         # Task complexity mapping

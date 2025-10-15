@@ -4,7 +4,7 @@ import statistics
 import pytest
 import concurrent.futures
 from dotenv import load_dotenv
-import openai
+from openai import OpenAI
 
 # Load environment variables
 load_dotenv()
@@ -15,8 +15,10 @@ class TestDeepSeekPerformanceAndRateLimiting:
         api_key = os.getenv('NVIDIA_API_KEY')
         if not api_key:
             pytest.skip("NVIDIA_API_KEY not set")
-        openai.api_key = api_key
-        openai.api_base = "https://integrate.api.nvidia.com/v1"
+        self.client = OpenAI(
+            api_key=api_key,
+            base_url="https://integrate.api.nvidia.com/v1"
+        )
         
         # Performance thresholds
         self.PERFORMANCE_THRESHOLDS = {
@@ -29,17 +31,17 @@ class TestDeepSeekPerformanceAndRateLimiting:
     def generate_response(self, prompt):
         """Generate response and measure performance"""
         start_time = time.time()
-        response = openai.ChatCompletion.create(
+        response = self.client.chat.completions.create(
             model="deepseek-ai/deepseek-r1",
             messages=[{"role": "user", "content": prompt}],
             max_tokens=200
         )
         end_time = time.time()
-        
+
         return {
             'response': response,
             'response_time_ms': (end_time - start_time) * 1000,
-            'token_count': len(response['choices'][0]['message']['content'].split())
+            'token_count': len(response.choices[0].message.content.split())
         }
     
     def test_individual_response_performance(self):
