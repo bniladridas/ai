@@ -1,0 +1,23 @@
+models:
+  - name: gpt-4o
+    type: openai
+    description: advanced
+  - name: deepseek-r1
+    type: deepseek
+    description: reasoning
+  - name: claude-3-5-sonnet-20241022
+    type: anthropic
+    description: balanced
+  - name: gemini-2.0-flash-exp
+    type: google
+    description: experimental
+
+# Benchmark settings
+batch_size: 1
+eval_freq: 10
+log_freq: 5
+
+# Wandb settings
+wandb:
+  project: ai-benchmark
+  enabled: false
