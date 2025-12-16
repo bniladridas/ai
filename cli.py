@@ -4,7 +4,13 @@ import os
 import sys
 from pathlib import Path
 
+import yaml
 from dotenv import load_dotenv
+
+try:
+    import wandb
+except ImportError:
+    wandb = None
 
 load_dotenv()
 sys.path.insert(0, str(Path(__file__).parent))
@@ -21,12 +27,11 @@ def benchmark(args):
 
     from tests.integration.benchmark import AdvancedModelBenchmark
 
-    models = [
-        {"name": "gpt-4o", "type": "openai"},
-        {"name": "deepseek-r1", "type": "deepseek"},
-        {"name": "claude-3-5-sonnet-20241022", "type": "anthropic"},
-        {"name": "gemini-2.0-flash-exp", "type": "google"},
-    ]
+    config_path = Path(__file__).parent / "config" / "benchmark.yaml"
+    with open(config_path) as f:
+        config = yaml.safe_load(f)
+
+    models = config["models"]
 
     try:
         benchmark = AdvancedModelBenchmark(models)
@@ -35,6 +40,18 @@ def benchmark(args):
         for r in results:
             print(f"{r.model_name}: {r.avg_response_time:.2f}s, {r.task_success_rate:.1f}% success")
         print("completed. check reports/")
+
+        if wandb and config.get("wandb", {}).get("enabled", False):
+            wandb.init(project=config["wandb"]["project"])
+            for r in results:
+                wandb.log(
+                    {
+                        "model": r.model_name,
+                        "response_time": r.avg_response_time,
+                        "success_rate": r.task_success_rate,
+                    }
+                )
+            print("logged to wandb")
     except Exception as e:
         print(f"failed: {e}")
 
@@ -51,14 +68,15 @@ def compare(args):
 
 
 def models(args):
-    models = [
-        ("deepseek r1", "nvidia", "reasoning"),
-        ("gpt-4o", "openai", "advanced"),
-        ("claude-3.5-sonnet", "anthropic", "balanced"),
-        ("gemini-2.0-flash-exp", "google", "experimental"),
-    ]
-    for name, provider, desc in models:
-        print(f"{name}: {provider} ({desc})")
+    config_path = Path(__file__).parent / "config" / "benchmark.yaml"
+    with open(config_path) as f:
+        config = yaml.safe_load(f)
+
+    for model in config["models"]:
+        name = model["name"]
+        type_ = model["type"]
+        desc = model.get("description", "")
+        print(f"{name}: {type_} ({desc})")
 
 
 def status(args):

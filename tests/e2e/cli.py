@@ -31,7 +31,7 @@ def test_cli_models():
         [sys.executable, str(cli_path), "models"], capture_output=True, text=True
     )
     assert result.returncode == 0
-    assert "deepseek r1" in result.stdout.lower()
+    assert "deepseek-r1" in result.stdout.lower()
     assert "gpt-4o" in result.stdout.lower()
 
 
