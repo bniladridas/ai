@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="https://raw.githubusercontent.com/Coccinella-Labs/ai/main/.github/assets/thumbnail.png" alt="ai" width="100%">
+</p>
+
 AI Model Benchmarking and Selection Tool
 
 This repository provides a lightweight, Python-based toolkit for benchmarking and comparing large language models across multiple providers, including OpenAI, Anthropic, Google, and NVIDIA. It is intended for developers who want a repeatable way to evaluate models using consistent tasks and measurable criteria, such as latency, success rate, and task difficulty, in order to select an appropriate model for a given use case.
